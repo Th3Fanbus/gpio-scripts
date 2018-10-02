@@ -216,138 +216,6 @@ u32 gpi_ie[] = {
 
 u32 gpio_pirq_to_apic = 0xffff; //(GPIPRIOQ2IOXAPIC)
 
-/* LynxPoint LP GPIOBASE Registers */
-#define GPIO_OWNER(set)		(0x00 + ((set) * 4))
-#define GPIO_PIRQ_APIC_EN	0x10
-#define GPIO_BLINK		0x18
-#define GPIO_SER_BLINK		0x1c
-#define GPIO_SER_BLINK_CS	0x20
-#define GPIO_SER_BLINK_DATA	0x24
-#define GPIO_ROUTE(set)		(0x30 + ((set) * 4))
-#define GPIO_RESET(set)		(0x60 + ((set) * 4))
-#define GPIO_GLOBAL_CONFIG	0x7c
-#define GPIO_IRQ_IS(set)	(0x80 + ((set) * 4))
-#define GPIO_IRQ_IE(set)	(0x90 + ((set) * 4))
-#define GPIO_CONFIG0(gpio)	(0x100 + ((gpio) * 8))
-#define GPIO_CONFIG1(gpio)	(0x104 + ((gpio) * 8))
-
-#define MAX_GPIO_NUMBER		94 /* zero based */
-#define GPIO_LIST_END		0xffffffff
-
-/* conf0 */
-
-#define GPIO_MODE_NATIVE	(0 << 0)
-#define GPIO_MODE_GPIO		(1 << 0)
-
-#define GPIO_DIR_OUTPUT		(0 << 2)
-#define GPIO_DIR_INPUT		(1 << 2)
-
-#define GPIO_NO_INVERT		(0 << 3)
-#define GPIO_INVERT		(1 << 3)
-
-#define GPIO_IRQ_EDGE		(0 << 4)
-#define GPIO_IRQ_LEVEL		(1 << 4)
-
-#define GPI_LEVEL		(1 << 30)
-
-#define GPO_LEVEL_SHIFT		31
-#define GPO_LEVEL_MASK		(1UL << GPO_LEVEL_SHIFT)
-#define GPO_LEVEL_LOW		(0UL << GPO_LEVEL_SHIFT)
-#define GPO_LEVEL_HIGH		(1UL << GPO_LEVEL_SHIFT)
-
-/* conf1 */
-
-#define GPIO_PULL_NONE		(0 << 0)
-#define GPIO_PULL_DOWN		(1 << 0)
-#define GPIO_PULL_UP		(2 << 0)
-
-#define GPIO_SENSE_ENABLE	(0 << 2)
-#define GPIO_SENSE_DISABLE	(1 << 2)
-
-/* owner */
-
-#define GPIO_OWNER_ACPI		0
-#define GPIO_OWNER_GPIO		1
-
-/* route */
-
-#define GPIO_ROUTE_SCI		0
-#define GPIO_ROUTE_SMI		1
-
-/* irqen */
-
-#define GPIO_IRQ_DISABLE	0
-#define GPIO_IRQ_ENABLE		1
-
-/* blink */
-
-#define GPO_NO_BLINK		0
-#define GPO_BLINK		1
-
-/* reset */
-
-#define GPIO_RESET_PWROK	0
-#define GPIO_RESET_RSMRST	1
-
-/* pirq route to io-apic */
-
-#define GPIO_PIRQ_APIC_MASK	0
-#define GPIO_PIRQ_APIC_ROUTE	1
-
-#define LP_GPIO_END \
-	{ .conf0 = GPIO_LIST_END }
-
-#define LP_GPIO_NATIVE \
-	{ .conf0 = GPIO_MODE_NATIVE }
-
-#define LP_GPIO_UNUSED \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .conf1 = GPIO_SENSE_DISABLE }
-
-#define LP_GPIO_ACPI_SCI \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT | GPIO_INVERT, \
-	  .owner = GPIO_OWNER_ACPI, \
-	  .route = GPIO_ROUTE_SCI }
-
-#define LP_GPIO_ACPI_SMI \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT | GPIO_INVERT, \
-	  .owner = GPIO_OWNER_ACPI, \
-	  .route = GPIO_ROUTE_SMI }
-
-#define LP_GPIO_INPUT \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT, \
-	  .owner = GPIO_OWNER_GPIO }
-
-#define LP_GPIO_INPUT_INVERT \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT | GPIO_INVERT, \
-	  .owner = GPIO_OWNER_GPIO }
-
-#define LP_GPIO_IRQ_EDGE \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT | GPIO_IRQ_EDGE, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .irqen = GPIO_IRQ_ENABLE }
-
-#define LP_GPIO_IRQ_LEVEL \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT | GPIO_IRQ_LEVEL, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .irqen = GPIO_IRQ_ENABLE }
-
-#define LP_GPIO_PIRQ \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_INPUT, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .pirq  = GPIO_PIRQ_APIC_ROUTE }
-
-#define LP_GPIO_OUT_HIGH \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_OUTPUT | GPO_LEVEL_HIGH, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .conf1 = GPIO_SENSE_DISABLE }
-
-#define LP_GPIO_OUT_LOW \
-	{ .conf0 = GPIO_MODE_GPIO | GPIO_DIR_OUTPUT | GPO_LEVEL_LOW, \
-	  .owner = GPIO_OWNER_GPIO, \
-	  .conf1 = GPIO_SENSE_DISABLE }
-
 u32 a(u32 i) /* Accesses GPnCONFIGA */
 {
 	return i * 2;
@@ -372,8 +240,6 @@ const char *gpio_cfg(u32 i)
 	u32 gpio_irq_level =		gpio_dump[a(i)] & (1 << 4);
 	u32 gpo_level_high =		gpio_dump[a(i)] & (1 << 31);
 
-	//u32 gpio_pull_down =		gpio_dump[b(i)] & (1 << 0);
-	//u32 gpio_pull_up =		gpio_dump[b(i)] & (2 << 0);
 	u32 gpio_sense_disable =	gpio_dump[b(i)] & (1 << 2);
 
 	if (!gpio_mode_gpio) return "LP_GPIO_NATIVE";
@@ -400,7 +266,7 @@ const char *gpio_cfg(u32 i)
 					"LP_GPIO_ACPI_SCI";
 			} else {
 				/* This should not happen */
-				//exit(EXIT_FAILURE);
+				return "LP_GPIO_UNUSED";
 			}
 		}
 	} else {
@@ -410,7 +276,7 @@ const char *gpio_cfg(u32 i)
 				"LP_GPIO_OUT_LOW";
 		} else {
 			/* This should not happen */
-			//exit(EXIT_FAILURE);
+			return "LP_GPIO_UNUSED";
 		}
 	}
 	return "LP_GPIO_UNUSED"; /* Safe default */
@@ -418,31 +284,30 @@ const char *gpio_cfg(u32 i)
 
 int main(void)
 {
-	u32 i;
-
-	printf("/*\n"
-" * This file is part of the coreboot project.\n"
-" *\n"
-" * Copyright (C) 2018 Angel Pons <th3fanbus@gmail.com>\n"
-" *\n"
-" * This program is free software; you can redistribute it and/or modify\n"
-" * it under the terms of the GNU General Public License as published by\n"
-" * the Free Software Foundation; version 2 of the License.\n"
-" *\n"
-" * This program is distributed in the hope that it will be useful,\n"
-" * but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-" * GNU General Public License for more details.\n"
-" */\n"
-"\n"
-"#include <southbridge/intel/lynxpoint/lp_gpio.h>\n"
-"\n"
-);
+	printf(	"/*\n"
+		" * This file is part of the coreboot project.\n"
+		" *\n"
+		" * Copyright (C) 2018 Angel Pons <th3fanbus@gmail.com>\n"
+		" *\n"
+		" * This program is free software; you can redistribute it and/or modify\n"
+		" * it under the terms of the GNU General Public License as published by\n"
+		" * the Free Software Foundation; version 2 of the License.\n"
+		" *\n"
+		" * This program is distributed in the hope that it will be useful,\n"
+		" * but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+		" * GNU General Public License for more details.\n"
+		" */\n"
+		"\n"
+		"#include <southbridge/intel/lynxpoint/lp_gpio.h>\n"
+	"\n");
 
 	printf("const struct pch_lp_gpio_map mainboard_gpio_map[] = {\n");
-	for (i=0; i<95; i++) {
+
+	for (u32 i = 0; i < 95; i++) {
 		printf("\t%s,\n", gpio_cfg(i));
 	}
+
 	printf("\tLP_GPIO_END\n};\n\n");
 	return EXIT_SUCCESS;
 }
