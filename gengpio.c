@@ -2,6 +2,9 @@
 
 typedef unsigned int u32;
 
+/* FIXME: _DIFF values are untested, only change the other
+ * ones with the values read from, e.g., inteltool! */
+
 u32 GPIO_USE_SEL=0x18fefffe;
 u32 GPIO_USE_SEL_DIFF=0xffffffff;
 
@@ -14,6 +17,7 @@ u32 GP_LVL_DIFF=0xffffffff;
 u32 GPI_INV=0x00002480;
 u32 GPI_INV_DIFF=0xffffffff;
 
+/* FIXME: "blink" is missing */
 
 u32 GPIO_USE_SEL2=0x130300ff;
 u32 GPIO_USE_SEL2_DIFF=0xffffffff;
