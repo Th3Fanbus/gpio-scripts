@@ -3,7 +3,9 @@
 
 typedef unsigned int u32;
 
-u32 gpio_dump[] = {
+#define SIZE 95
+
+static const u32 gpio_dump[SIZE + SIZE] = {
 	0x80000005, //(GP0CONFIGA)
 	0x00000004, //(GP0CONFIGB)
 	0x80000005, //(GP1CONFIGA)
@@ -196,49 +198,49 @@ u32 gpio_dump[] = {
 	0x00000004, //(GP94CONFIGB)
 };
 
-u32 gpio_own[] = {
+static const u32 gpio_own[] = {
 	0xf7fddbff, //(GPIO_OWN1)
 	0xfffffffb, //(GPIO_OWN2)
 	0x7fffffff, //(GPIO_OWN3)
 };
 
-u32 gpi_rout[] = {
+static const u32 gpi_rout[] = {
 	0x00000000, //(GPI_ROUT)
 	0x00000004, //(RESERVED)
 	0x00004000, //(RESERVED)
 };
 
-u32 gpi_ie[] = {
+static const u32 gpi_ie[] = {
 	0x00000000, //(GPI_IE[31:0])
 	0x00000000, //(GPI_IE[63:32])
 	0x00000000, //(GPI_IE[94:64])
 };
 
-u32 gpio_pirq_to_apic = 0xffff; //(GPIPRIOQ2IOXAPIC)
+static const u32 gpio_pirq_to_apic = 0xffff; //(GPIPRIOQ2IOXAPIC)
 
-u32 a(u32 i) /* Accesses GPnCONFIGA */
+static u32 a(const u32 i) /* Accesses GPnCONFIGA */
 {
-	return i * 2;
+	return i + i;
 }
 
-u32 b(u32 i) /* Accesses GPnCONFIGB */
+static u32 b(const u32 i) /* Accesses GPnCONFIGB */
 {
-	return (i * 2) + 1;
+	return i + i + 1;
 }
 
-const char *gpio_cfg(u32 i)
+static const char *gpio_cfg(const u32 i)
 {
-	u32 gpio_owner_gpio =		gpio_own[i / 32] & (1 << (i % 32));
-	u32 gpio_route_smi =		gpi_rout[i / 32] & (1 << (i % 32));
-	u32 gpio_irq_enable =		gpi_ie[i / 32] & (1 << (i % 32));
+	const u32 gpio_owner_gpio =		gpio_own[i / 32] & (1 << (i % 32));
+	const u32 gpio_route_smi =		gpi_rout[i / 32] & (1 << (i % 32));
+	const u32 gpio_irq_enable =		gpi_ie[i / 32] & (1 << (i % 32));
 
-	u32 gpio_pirq_apic_route =	gpio_pirq_to_apic & (1 << i);
+	const u32 gpio_pirq_apic_route =	gpio_pirq_to_apic & (1 << i);
 
-	u32 gpio_mode_gpio =		gpio_dump[a(i)] & (1 << 0);
-	u32 gpio_dir_input =		gpio_dump[a(i)] & (1 << 2);
-	u32 gpio_invert =		gpio_dump[a(i)] & (1 << 3);
-	u32 gpio_irq_level =		gpio_dump[a(i)] & (1 << 4);
-	u32 gpo_level_high =		gpio_dump[a(i)] & (1 << 31);
+	const u32 gpio_mode_gpio =		gpio_dump[a(i)] & (1 << 0);
+	const u32 gpio_dir_input =		gpio_dump[a(i)] & (1 << 2);
+	const u32 gpio_invert =		gpio_dump[a(i)] & (1 << 3);
+	const u32 gpio_irq_level =		gpio_dump[a(i)] & (1 << 4);
+	const u32 gpo_level_high =		gpio_dump[a(i)] & (1 << 31);
 
 	u32 gpio_sense_disable =	gpio_dump[b(i)] & (1 << 2);
 
@@ -266,7 +268,7 @@ const char *gpio_cfg(u32 i)
 					"LP_GPIO_ACPI_SCI";
 			} else {
 				/* This should not happen */
-				return "LP_GPIO_UNUSED";
+				return "LP_GPIO_UNUSED /* FIXME: Double-check this. */";
 			}
 		}
 	} else {
@@ -276,10 +278,10 @@ const char *gpio_cfg(u32 i)
 				"LP_GPIO_OUT_LOW";
 		} else {
 			/* This should not happen */
-			return "LP_GPIO_UNUSED";
+			return "LP_GPIO_UNUSED /* FIXME: Double-check this as well. */";
 		}
 	}
-	return "LP_GPIO_UNUSED"; /* Safe default */
+	return "LP_GPIO_UNUSED /* FIXME: Confirm this is correct. */"; /* Default */
 }
 
 int main(void)
@@ -304,7 +306,7 @@ int main(void)
 
 	printf("const struct pch_lp_gpio_map mainboard_gpio_map[] = {\n");
 
-	for (u32 i = 0; i < 95; i++) {
+	for (u32 i = 0; i <= SIZE; i++) {
 		printf("\t%s,\n", gpio_cfg(i));
 	}
 
