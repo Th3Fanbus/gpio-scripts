@@ -1,248 +1,296 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 
-typedef unsigned int u32;
+typedef const uint16_t cte16_t;
+typedef const uint32_t cte32_t;
 
-#define SIZE 95
+/* Number of GPIOs (array size) */
+#define GPIO_ARR_SIZE	95
 
-static const u32 gpio_dump[SIZE + SIZE] = {
-	 0x00000005, /* (GP0CONFIGA) */
-	 0x00000004, /* (GP0CONFIGB) */
-	 0x00000005, /* (GP1CONFIGA) */
-	 0x00000004, /* (GP1CONFIGB) */
-	 0x00000005, /* (GP2CONFIGA) */
-	 0x00000004, /* (GP2CONFIGB) */
-	 0x00000005, /* (GP3CONFIGA) */
-	 0x00000004, /* (GP3CONFIGB) */
-	 0x40000005, /* (GP4CONFIGA) */
-	 0x00000004, /* (GP4CONFIGB) */
-	 0x40000005, /* (GP5CONFIGA) */
-	 0x00000004, /* (GP5CONFIGB) */
-	 0x00000004, /* (GP6CONFIGA) */
-	 0x00000004, /* (GP6CONFIGB) */
-	 0x00000004, /* (GP7CONFIGA) */
-	 0x00000004, /* (GP7CONFIGB) */
-	 0x00000005, /* (GP8CONFIGA) */
-	 0x00000004, /* (GP8CONFIGB) */
-	 0x00000005, /* (GP9CONFIGA) */
-	 0x00000004, /* (GP9CONFIGB) */
-	 0x00000005, /* (GP10CONFIGA) */
-	 0x00000004, /* (GP10CONFIGB) */
-	 0x40000005, /* (GP11CONFIGA) */
-	 0x00000004, /* (GP11CONFIGB) */
-	 0x00000005, /* (GP12CONFIGA) */
-	 0x00000004, /* (GP12CONFIGB) */
-	 0x00000005, /* (GP13CONFIGA) */
-	 0x00000004, /* (GP13CONFIGB) */
-	 0x00000005, /* (GP14CONFIGA) */
-	 0x00000004, /* (GP14CONFIGB) */
-	 0x0000001d, /* (GP15CONFIGA) */
-	 0x00000000, /* (GP15CONFIGB) */
-	 0x00000005, /* (GP16CONFIGA) */
-	 0x00000004, /* (GP16CONFIGB) */
-	 0x00000005, /* (GP17CONFIGA) */
-	 0x00000004, /* (GP17CONFIGB) */
-	 0x00000005, /* (GP18CONFIGA) */
-	 0x00000004, /* (GP18CONFIGB) */
-	 0x00000005, /* (GP19CONFIGA) */
-	 0x00000004, /* (GP19CONFIGB) */
-	 0x00000004, /* (GP20CONFIGA) */
-	 0x00000004, /* (GP20CONFIGB) */
-	 0x40000004, /* (GP21CONFIGA) */
-	 0x00000004, /* (GP21CONFIGB) */
-	 0x40000004, /* (GP22CONFIGA) */
-	 0x00000004, /* (GP22CONFIGB) */
-	 0x00000005, /* (GP23CONFIGA) */
-	 0x00000004, /* (GP23CONFIGB) */
-	 0x40000005, /* (GP24CONFIGA) */
-	 0x00000004, /* (GP24CONFIGB) */
-	 0x00000005, /* (GP25CONFIGA) */
-	 0x00000004, /* (GP25CONFIGB) */
-	 0x40000005, /* (GP26CONFIGA) */
-	 0x00000000, /* (GP26CONFIGB) */
-	 0x00000005, /* (GP27CONFIGA) */
-	 0x00000000, /* (GP27CONFIGB) */
-	 0x40000005, /* (GP28CONFIGA) */
-	 0x00000004, /* (GP28CONFIGB) */
-	 0x40000004, /* (GP29CONFIGA) */
-	 0x00000004, /* (GP29CONFIGB) */
-	 0x00000004, /* (GP30CONFIGA) */
-	 0x00000004, /* (GP30CONFIGB) */
-	 0x40000001, /* (GP31CONFIGA) */
-	 0x00000004, /* (GP31CONFIGB) */
-	 0x00000004, /* (GP32CONFIGA) */
-	 0x00000004, /* (GP32CONFIGB) */
-	 0x00000004, /* (GP33CONFIGA) */
-	 0x00000004, /* (GP33CONFIGB) */
-	 0x00000005, /* (GP34CONFIGA) */
-	 0x00000004, /* (GP34CONFIGB) */
-	 0x00000005, /* (GP35CONFIGA) */
-	 0x00000004, /* (GP35CONFIGB) */
-	 0x00000005, /* (GP36CONFIGA) */
-	 0x00000004, /* (GP36CONFIGB) */
-	 0x00000005, /* (GP37CONFIGA) */
-	 0x00000004, /* (GP37CONFIGB) */
-	 0x00000005, /* (GP38CONFIGA) */
-	 0x00000004, /* (GP38CONFIGB) */
-	 0x4000000d, /* (GP39CONFIGA) */
-	 0x00000000, /* (GP39CONFIGB) */
-	 0x40000004, /* (GP40CONFIGA) */
-	 0x00000004, /* (GP40CONFIGB) */
-	 0x40000004, /* (GP41CONFIGA) */
-	 0x00000004, /* (GP41CONFIGB) */
-	 0x00000005, /* (GP42CONFIGA) */
-	 0x00000004, /* (GP42CONFIGB) */
-	 0x00000005, /* (GP43CONFIGA) */
-	 0x00000004, /* (GP43CONFIGB) */
-	 0x00000005, /* (GP44CONFIGA) */
-	 0x00000004, /* (GP44CONFIGB) */
-	 0x00000005, /* (GP45CONFIGA) */
-	 0x00000004, /* (GP45CONFIGB) */
-	 0x00000005, /* (GP46CONFIGA) */
-	 0x00000004, /* (GP46CONFIGB) */
-	 0x00000005, /* (GP47CONFIGA) */
-	 0x00000004, /* (GP47CONFIGB) */
-	 0x00000005, /* (GP48CONFIGA) */
-	 0x00000004, /* (GP48CONFIGB) */
-	 0x40000005, /* (GP49CONFIGA) */
-	 0x00000000, /* (GP49CONFIGB) */
-	 0x40000015, /* (GP50CONFIGA) */
-	 0x00000000, /* (GP50CONFIGB) */
-	 0x40000005, /* (GP51CONFIGA) */
-	 0x00000004, /* (GP51CONFIGB) */
-	 0x40000005, /* (GP52CONFIGA) */
-	 0x00000004, /* (GP52CONFIGB) */
-	 0x00000005, /* (GP53CONFIGA) */
-	 0x00000000, /* (GP53CONFIGB) */
-	 0x00000005, /* (GP54CONFIGA) */
-	 0x00000000, /* (GP54CONFIGB) */
-	 0x40000015, /* (GP55CONFIGA) */
-	 0x00000000, /* (GP55CONFIGB) */
-	 0x00000005, /* (GP56CONFIGA) */
-	 0x00000004, /* (GP56CONFIGB) */
-	 0x40000005, /* (GP57CONFIGA) */
-	 0x00000004, /* (GP57CONFIGB) */
-	 0x40000005, /* (GP58CONFIGA) */
-	 0x00000004, /* (GP58CONFIGB) */
-	 0x00000005, /* (GP59CONFIGA) */
-	 0x00000004, /* (GP59CONFIGB) */
-	 0x40000005, /* (GP60CONFIGA) */
-	 0x00000004, /* (GP60CONFIGB) */
-	 0x40000005, /* (GP61CONFIGA) */
-	 0x00000004, /* (GP61CONFIGB) */
-	 0x40000005, /* (GP62CONFIGA) */
-	 0x00000004, /* (GP62CONFIGB) */
-	 0x40000000, /* (GP63CONFIGA) */
-	 0x00000004, /* (GP63CONFIGB) */
-	 0x00000005, /* (GP64CONFIGA) */
-	 0x00000004, /* (GP64CONFIGB) */
-	 0x00000005, /* (GP65CONFIGA) */
-	 0x00000004, /* (GP65CONFIGB) */
-	 0x00000005, /* (GP66CONFIGA) */
-	 0x00000004, /* (GP66CONFIGB) */
-	 0x00000005, /* (GP67CONFIGA) */
-	 0x00000004, /* (GP67CONFIGB) */
-	 0x00000005, /* (GP68CONFIGA) */
-	 0x00000004, /* (GP68CONFIGB) */
-	 0x00000005, /* (GP69CONFIGA) */
-	 0x00000004, /* (GP69CONFIGB) */
-	 0x4000001d, /* (GP70CONFIGA) */
-	 0x00000000, /* (GP70CONFIGB) */
-	 0x00000005, /* (GP71CONFIGA) */
-	 0x00000004, /* (GP71CONFIGB) */
-	 0x40000004, /* (GP72CONFIGA) */
-	 0x00000004, /* (GP72CONFIGB) */
-	 0x40000005, /* (GP73CONFIGA) */
-	 0x00000004, /* (GP73CONFIGB) */
-	 0x40000004, /* (GP74CONFIGA) */
-	 0x00000004, /* (GP74CONFIGB) */
-	 0x40000004, /* (GP75CONFIGA) */
-	 0x00000004, /* (GP75CONFIGB) */
-	 0x00000005, /* (GP76CONFIGA) */
-	 0x00000004, /* (GP76CONFIGB) */
-	 0xc0000011, /* (GP77CONFIGA) */
-	 0x00000004, /* (GP77CONFIGB) */
-	 0x40000005, /* (GP78CONFIGA) */
-	 0x00000004, /* (GP78CONFIGB) */
-	 0x40000005, /* (GP79CONFIGA) */
-	 0x00000004, /* (GP79CONFIGB) */
-	 0x40000005, /* (GP80CONFIGA) */
-	 0x00000004, /* (GP80CONFIGB) */
-	 0x00000000, /* (GP81CONFIGA) */
-	 0x00000004, /* (GP81CONFIGB) */
-	 0x40000004, /* (GP82CONFIGA) */
-	 0x00000004, /* (GP82CONFIGB) */
-	 0x00000005, /* (GP83CONFIGA) */
-	 0x00000004, /* (GP83CONFIGB) */
-	 0x00000005, /* (GP84CONFIGA) */
-	 0x00000004, /* (GP84CONFIGB) */
-	 0x00000005, /* (GP85CONFIGA) */
-	 0x00000004, /* (GP85CONFIGB) */
-	 0x00000005, /* (GP86CONFIGA) */
-	 0x00000004, /* (GP86CONFIGB) */
-	 0x00000005, /* (GP87CONFIGA) */
-	 0x00000004, /* (GP87CONFIGB) */
-	 0x00000005, /* (GP88CONFIGA) */
-	 0x00000004, /* (GP88CONFIGB) */
-	 0x00000005, /* (GP89CONFIGA) */
-	 0x00000004, /* (GP89CONFIGB) */
-	 0x00000005, /* (GP90CONFIGA) */
-	 0x00000004, /* (GP90CONFIGB) */
-	 0x00000005, /* (GP91CONFIGA) */
-	 0x00000004, /* (GP91CONFIGB) */
-	 0x00000005, /* (GP92CONFIGA) */
-	 0x00000004, /* (GP92CONFIGB) */
-	 0x00000005, /* (GP93CONFIGA) */
-	 0x00000004, /* (GP93CONFIGB) */
-	 0x00000005, /* (GP94CONFIGA) */
-	 0x00000004, /* (GP94CONFIGB) */
+/* Bit macro */
+#define BIT(x)		(1 << (x))
+
+/* FIXME: Read these values from elsewhere */
+
+static cte32_t gpio_own[3] = {
+	0xffff7fff,
+	0xff7bff7f,
+	0x7fffffbf,
 };
 
-static const u32 gpio_own[] = {
-	0xffff7fff, //(GPIO_OWN1)
-	0xff7bff7f, //(GPIO_OWN2)
-	0x7fffffbf, //(GPIO_OWN3)
+static cte16_t pirq_to_ioxapic	= 0x8400;
+
+static cte32_t gpo_blink	= 0x00000000;
+
+static cte16_t gpi_nmi_en	= 0x0000;
+
+/*
+ * Note that inteltool only prints one GPI_ROUT register.
+ * Please also use the two RESERVED values right below GPI_ROUT.
+ */
+static cte32_t gpi_rout[3] = {
+	0x00050000,
+	0x00000000,
+	0x00050000,
 };
 
-static const u32 gpi_rout[] = {
-	0x00050000, //(GPI_ROUT)
-	0x00000000, //(RESERVED)
-	0x00050000, //(RESERVED)
+static cte32_t alt_gpi_smi_en	= 0x00000080;
+
+static cte32_t gp_rst_sel[3] = {
+	0x01000000,
+	0x00000000,
+	0x00000000,
 };
 
-static const u32 gpi_ie[] = {
-	0x00000000, //(GPI_IE[31:0])
-	0x00000000, //(GPI_IE[63:32])
-	0x00000000, //(GPI_IE[94:64])
+static cte32_t gpio_gc		= 0x00000000;
+
+static cte32_t gpi_ie[3] = {
+	0x00000000,
+	0x00000000,
+	0x00000000,
 };
 
-static const u32 gpio_pirq_to_apic = 0x8400; //(GPIPRIOQ2IOXAPIC)
+static cte32_t gp_config[GPIO_ARR_SIZE + GPIO_ARR_SIZE] = {
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x0000001d,
+	0x00000000,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000000,
+	0x00000005,
+	0x00000000,
+	0x40000005,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x40000001,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x4000000d,
+	0x00000000,
+	0x40000004,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000000,
+	0x40000015,
+	0x00000000,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000005,
+	0x00000000,
+	0x00000005,
+	0x00000000,
+	0x40000015,
+	0x00000000,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000000,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x4000001d,
+	0x00000000,
+	0x00000005,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0xc0000011,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x40000005,
+	0x00000004,
+	0x00000000,
+	0x00000004,
+	0x40000004,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+	0x00000005,
+	0x00000004,
+};
 
-static u32 a(const u32 i) /* Accesses GPnCONFIGA */
+#define GPIO_OWNER(gpio)	(!!(gpio_own[(gpio) / 32] & BIT((gpio) % 32)))
+#define     GPIO_OWNER_ACPI	0
+#define     GPIO_OWNER_GPIO	1
+
+#define GPO_BLINK(gpio)		(!!(gpo_blink & BIT(gpio)))
+#define GPI_NMI_EN(gpio)	(!!(gpi_nmi_en & BIT((gpio) - 32)))
+
+#define GPI_ROUT(gpio)		(!!(gpi_rout[(gpio) / 32] & BIT((gpio) % 32)))
+#define     GPI_ROUT_SCI	0
+#define     GPI_ROUT_NMI_SMI	1
+
+#define ALT_GPI_SMI_EN(gpio)	(!!(alt_gpi_smi_en & BIT((gpio) - 32)))
+
+#define GP_RST_SEL(gpio)	(!!(gp_rst_sel[(gpio) / 32] & BIT((gpio) % 32)))
+
+#define GPI_IE(gpio)		(!!(gpi_ie[(gpio) / 32] & BIT((gpio) % 32)))
+
+/* Accessors for GPnCONFIGA and GPnCONFIGB */
+#define GP_CFG_A(gpio)			(gp_config[0 + (gpio) + (gpio)])
+#define GP_CFG_B(gpio)			(gp_config[1 + (gpio) + (gpio)])
+
+static const char *gpio_cfg(cte32_t gpio)
 {
-	return i + i;
-}
+	printf("\t{\n");
+	printf("\t\t.conf0 = 0x%08x,\n", GP_CFG_A(gpio));
+	printf("\t\t.conf1 = 0x%08x,\n", GP_CFG_B(gpio));
+	printf("\t\t.owner = %u,\n",     GPIO_OWNER(gpio));
+	printf("\t\t.route = %u,\n",     GPI_ROUT(gpio));
+	printf("\t\t.irqen = %u,\n",     GPI_IE(gpio));
+	printf("\t\t.reset = %u,\n",     GP_RST_SEL(gpio));
+	if (gpio < 32)
+		printf("\t\t.blink = %u,\n",     GPO_BLINK(gpio));
+	return "}";
+#if 0
+	cte32_t gpio_owner_gpio		= GPIO_OWNER(gpio);
+	cte32_t gpio_route_smi		= GPI_ROUT(gpio);
+	cte32_t gpio_irq_enable		= GPI_IE(gpio);
 
-static u32 b(const u32 i) /* Accesses GPnCONFIGB */
-{
-	return i + i + 1;
-}
+	cte32_t gpio_mode_gpio		= GP_CFG_A(gpio) & (1 << 0);
+	cte32_t gpio_dir_input		= GP_CFG_A(gpio) & (1 << 2);
+	cte32_t gpio_invert		= GP_CFG_A(gpio) & (1 << 3);
+	cte32_t gpio_irq_level		= GP_CFG_A(gpio) & (1 << 4);
+	cte32_t gpo_level_high		= GP_CFG_A(gpio) & (1 << 31);
 
-static const char *gpio_cfg(const u32 i)
-{
-	const u32 gpio_owner_gpio =		gpio_own[i / 32] & (1 << (i % 32));
-	const u32 gpio_route_smi =		gpi_rout[i / 32] & (1 << (i % 32));
-	const u32 gpio_irq_enable =		gpi_ie[i / 32] & (1 << (i % 32));
-
-	const u32 gpio_pirq_apic_route =	gpio_pirq_to_apic & (1 << i);
-
-	const u32 gpio_mode_gpio =		gpio_dump[a(i)] & (1 << 0);
-	const u32 gpio_dir_input =		gpio_dump[a(i)] & (1 << 2);
-	const u32 gpio_invert =			gpio_dump[a(i)] & (1 << 3);
-	const u32 gpio_irq_level =		gpio_dump[a(i)] & (1 << 4);
-	const u32 gpo_level_high =		gpio_dump[a(i)] & (1 << 31);
-
-	u32 gpio_sense_disable =	gpio_dump[b(i)] & (1 << 2);
+	cte32_t gpio_pull_down		= GP_CFG_B(gpio) & (1 << 0);
+	cte32_t gpio_pull_up		= GP_CFG_B(gpio) & (1 << 1);
+	cte32_t gpio_sense_disable	= GP_CFG_B(gpio) & (1 << 2);
 
 	if (!gpio_mode_gpio)
 		return "LP_GPIO_NATIVE";
@@ -253,8 +301,6 @@ static const char *gpio_cfg(const u32 i)
 				return "LP_GPIO_UNUSED";
 			} else if (gpio_invert) {
 				return "LP_GPIO_INPUT_INVERT";
-			} else if (gpio_pirq_apic_route) {
-				return "LP_GPIO_PIRQ";
 			} else if (gpio_irq_enable) {
 				return	(gpio_irq_level) ?
 					"LP_GPIO_IRQ_LEVEL":
@@ -283,20 +329,19 @@ static const char *gpio_cfg(const u32 i)
 		}
 	}
 	return "LP_GPIO_UNUSED /* FIXME: Confirm this is correct. */"; /* Default */
+#endif
 }
 
 int main(void)
 {
-	printf(
-		"/* SPDX-License-Identifier: GPL-2.0-only */\n"
-		"\n"
-		"#include <southbridge/intel/lynxpoint/lp_gpio.h>\n"
-		"\n"
-	);
+	printf("/* SPDX-License-Identifier: GPL-2.0-only */\n");
+	printf("\n");
+	printf("#include <southbridge/intel/lynxpoint/lp_gpio.h>\n");
+	printf("\n");
 
-	printf("const struct pch_lp_gpio_map mainboard_gpio_map[] = {\n");
+	printf("const struct pch_lp_gpio_map mainboard_gpio_map[] =\n{\n");
 
-	for (u32 i = 0; i <= SIZE; i++) {
+	for (uint32_t i = 0; i < GPIO_ARR_SIZE; i++) {
 		printf("\t%s,\n", gpio_cfg(i));
 	}
 
